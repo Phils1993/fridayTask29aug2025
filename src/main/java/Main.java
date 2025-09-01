@@ -7,6 +7,7 @@ public class Main {
 
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
+        emf.close();
         
     }
 }
