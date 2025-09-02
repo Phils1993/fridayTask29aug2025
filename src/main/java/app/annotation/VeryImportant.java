@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 
 @Retention(RetentionPolicy.RUNTIME) // available at runtime
-@Target({ElementType.TYPE})          // can annotate classes only
+@Target({ElementType.TYPE})          // can annotate classes use {add more elementTypes (fx. Field) }
 public @interface VeryImportant {
 }
 

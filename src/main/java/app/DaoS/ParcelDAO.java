@@ -14,11 +14,11 @@ import java.util.List;
 public class ParcelDAO {
 
     private final EntityManagerFactory emf;
-    private final Singleton singleton;
+    // private final Singleton singleton; // behøver ikke singleton class, fordi EntityManagerFactory
+    // er designet til at være en singleton-like. HibernateConfig sikre der KUN oprettes en per runtime
 
-    public ParcelDAO(EntityManagerFactory emf, Singleton singleton) {
+    public ParcelDAO(EntityManagerFactory emf) {
         this.emf = emf;
-        this.singleton = singleton;
     }
 
 
@@ -54,6 +54,9 @@ public class ParcelDAO {
         }
     }
 
+
+    // em.find bruger PK i DB som reference. Denne metoder tager tracking num som parameter
+    // og derfor virker denne metode ikke.
     /*
     public void updateStatus(String trackingNumber, DeliveryStatus newStatus) {
         try (EntityManager em = emf.createEntityManager()) {
@@ -92,6 +95,8 @@ public class ParcelDAO {
 
 
 
+    // em.find bruger PK i DB som reference. Denne metoder tager tracking num som parameter
+    // og derfor virker denne metode ikke.
     /*
     public boolean deleteParcelByTrackingNumber(String trackingNumber) {
         try (EntityManager em = emf.createEntityManager()) {
@@ -103,7 +108,6 @@ public class ParcelDAO {
         }
         return false;
     }
-
      */
 
     // same with em.remove only takes a PK and not tracking num
@@ -119,6 +123,7 @@ public class ParcelDAO {
             query.setParameter("trackingNumber", trackingNumber);
             List<Parcel> results = query.getResultList();
 
+            // if statement if results = empty
             if (results.isEmpty()) {
                 em.getTransaction().commit(); // nothing to delete
                 return false;

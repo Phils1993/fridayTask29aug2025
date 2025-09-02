@@ -13,8 +13,8 @@ import java.time.LocalDate;
 @Entity
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "parcels")
+@NoArgsConstructor
 
 public class Parcel {
     @Id
@@ -35,6 +35,14 @@ public class Parcel {
     private DeliveryStatus deliveryStatus;
 
     private LocalDate updated;
+
+    public Parcel(String trackingNumber, String senderName, String receiverName, DeliveryStatus deliveryStatus, LocalDate updated) {
+        this.trackingNumber = trackingNumber;
+        this.senderName = senderName;
+        this.receiverName = receiverName;
+        this.deliveryStatus = deliveryStatus;
+        this.updated = updated;
+    }
 
     @PreUpdate
     public void preUpdate() {

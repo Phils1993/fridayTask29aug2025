@@ -1,18 +1,17 @@
 package app.DaoS;
 
-import app.Threads.Singleton;
 import app.config.HibernateConfig;
 import app.entities.Parcel;
 import app.enums.DeliveryStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// API to @before all etc.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ParcelDAOTest {
     private EntityManagerFactory emf;
@@ -20,17 +19,20 @@ class ParcelDAOTest {
 
     @BeforeAll
     void setup() {
-        // Create an in-memory H2 database for testing
+        // Create an in-memory database for testing
         emf = HibernateConfig.getEntityManagerFactoryForTest();
-        parcelDAO = new ParcelDAO(emf, null); // singleton not needed for tests
+        parcelDAO = new ParcelDAO(emf);
     }
+
     @AfterAll
     public void teardown() {
+        // closes the connection after tests are done
         emf.close();
     }
 
     @BeforeEach
-    // cleans the DB
+        // cleans the test DB so the tests works.
+        // without this there would exist objects in DB and the update and create tests would fail
     void setUp() {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
@@ -39,18 +41,14 @@ class ParcelDAOTest {
         }
     }
 
-
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void createParcel() {
         // arrange
         Parcel parcel = new Parcel();
+        // variables must not be null
         parcel.setTrackingNumber("Track12345");
         parcel.setSenderName("Philip");
-        parcel.setReceiverName("Møller");
+        parcel.setReceiverName("Peter");
         parcel.setDeliveryStatus(DeliveryStatus.PENDING);
 
         // act
@@ -61,7 +59,7 @@ class ParcelDAOTest {
         assertEquals(1, results.size(), "there should be exactly one Parcel");
         Parcel persistedParcel = results.get(0);
         assertEquals("Philip", persistedParcel.getSenderName(), "Sender name should match");
-        assertEquals("Møller", persistedParcel.getReceiverName(), "Receiver name should match");
+        assertEquals("Peter", persistedParcel.getReceiverName(), "Receiver name should match");
         assertEquals(DeliveryStatus.PENDING, persistedParcel.getDeliveryStatus(), "Delivery status should match");
     }
 
@@ -70,8 +68,8 @@ class ParcelDAOTest {
         // Arrange
         Parcel parcel = new Parcel();
         parcel.setTrackingNumber("Track56789");
-        parcel.setSenderName("Valdemar");
-        parcel.setReceiverName("Vain");
+        parcel.setSenderName("Mette");
+        parcel.setReceiverName("Julie");
         parcel.setDeliveryStatus(DeliveryStatus.DELIVERED);
         parcelDAO.createParcel(parcel);
 
@@ -81,8 +79,8 @@ class ParcelDAOTest {
         // Assert
         List<Parcel> results = parcelDAO.parcelByTrackingNumber("Track56789");
         assertEquals(1, results.size(), "there should be exactly one Parcel");
-        assertEquals("Valdemar", results.get(0).getSenderName(), "Sender name should match");
-        assertEquals("Vain", results.get(0).getReceiverName(), "Receiver name should match");
+        assertEquals("Mette", results.get(0).getSenderName(), "Sender name should match");
+        assertEquals("Julie", results.get(0).getReceiverName(), "Receiver name should match");
         Parcel persistedParcel = results.get(0);
         assertEquals("Track56789", persistedParcel.getTrackingNumber());
 
@@ -90,8 +88,11 @@ class ParcelDAOTest {
 
     @Test
     void getAllParcels() {
+        // arrange
         List<Parcel> parcels = parcelDAO.getAllParcels();
+        // act
         assertNotNull(parcels);
+        // Assert
         assertTrue(true);
     }
 
@@ -126,7 +127,7 @@ class ParcelDAOTest {
         parcel.setDeliveryStatus(DeliveryStatus.PENDING);
         parcel.setTrackingNumber("Track9876");
         parcel.setSenderName("Mikkel");
-        parcel.setReceiverName("Benjamin");
+        parcel.setReceiverName("Valdemar");
         parcelDAO.createParcel(parcel);
 
         // act
@@ -148,6 +149,6 @@ class ParcelDAOTest {
 
         // Assert: method returns false, DB remains unchanged
         assertFalse(deleted, "Delete should return false for non-existent parcel");
-        // Optional: verify DB still contains any other parcels if needed
+
     }
 }
