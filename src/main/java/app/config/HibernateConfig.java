@@ -6,6 +6,7 @@ package app.config;
 import app.entities.Location;
 import app.entities.Parcel;
 import app.entities.Shipment;
+import app.services.Populator;
 import app.utils.Utils;
 
 import jakarta.persistence.EntityManagerFactory;
@@ -48,6 +49,7 @@ public class HibernateConfig {
         configuration.addAnnotatedClass(Parcel.class);
         configuration.addAnnotatedClass(Location.class);
         configuration.addAnnotatedClass(Shipment.class);
+        configuration.addAnnotatedClass(Populator.class);
     }
 
     private static EntityManagerFactory createEMF(boolean forTest) {

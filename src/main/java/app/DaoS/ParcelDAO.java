@@ -1,144 +1,107 @@
 package app.DaoS;
 
-import app.Threads.Singleton;
-import app.annotation.VeryImportant;
+import app.DTOMapper.DTOMapper;
 import app.entities.Parcel;
-import app.enums.DeliveryStatus;
+import app.records.ParcelDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
-@VeryImportant
 
-public class ParcelDAO {
+
+public class ParcelDAO implements Idao<Parcel, Integer>, IDTODAO<ParcelDTO, Integer> {
 
     private final EntityManagerFactory emf;
-    // private final Singleton singleton; // behøver ikke singleton class, fordi EntityManagerFactory
-    // er designet til at være en singleton-like. HibernateConfig sikre der KUN oprettes en per runtime
 
     public ParcelDAO(EntityManagerFactory emf) {
         this.emf = emf;
     }
 
 
+    @Override
+    public ParcelDTO getDtoById(Integer id) {
+        try (EntityManager em = emf.createEntityManager()) {
+            Parcel parcel = em.find(Parcel.class, id);
+            return DTOMapper.toParcelDTO(parcel);
+        } catch (Exception ex) {
+            throw new RuntimeException("Error getting ParcelDTO by ID", ex);
+        }
+    }
 
-    public void createParcel(Parcel parcel) {
+    @Override
+    public List<ParcelDTO> getAllDtos() {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Parcel> query = em.createQuery("SELECT p FROM Parcel p", Parcel.class);
+            List<Parcel> parcels = query.getResultList();
+            return parcels.stream()
+                    .map(DTOMapper::toParcelDTO)
+                    .toList();
+        } catch (Exception ex) {
+            throw new RuntimeException("Error getting all ParcelDTOs", ex);
+        }
+    }
+
+
+    @Override
+    public Parcel create(Parcel parcel) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             em.persist(parcel);
             em.getTransaction().commit();
+            return parcel;
         } catch (Exception ex) {
-            throw new RuntimeException("Error creating a new Parcel ", ex);
-        }
-    }
-
-    public List<Parcel> parcelByTrackingNumber(String trackingNumber) {
-        try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Parcel> query = em.createQuery(
-                    "SELECT p FROM Parcel p WHERE p.trackingNumber = :trackingNumber", Parcel.class
-            );
-            query.setParameter("trackingNumber", trackingNumber);
-            return query.getResultList();
-        } catch (Exception ex) {
-            throw new RuntimeException("Error getting parcel by trackingNumber ", ex);
-        }
-    }
-
-    public List<Parcel> getAllParcels() {
-        try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Parcel> query = em.createQuery("SELECT p FROM Parcel p", Parcel.class);
-            return query.getResultList();
-        } catch (Exception ex) {
-            throw new RuntimeException("Error getting all parcels ", ex);
+            throw new RuntimeException("Error creating parcel", ex);
         }
     }
 
 
-    // em.find bruger PK i DB som reference. Denne metoder tager tracking num som parameter
-    // og derfor virker denne metode ikke.
-    /*
-    public void updateStatus(String trackingNumber, DeliveryStatus newStatus) {
+    @Override
+    public Parcel getById(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
-            Parcel parcel = em.find(Parcel.class, trackingNumber);
-            parcel.setDeliveryStatus(newStatus);
+            return em.find(Parcel.class, id);
+        } catch (Exception ex) {
+            throw new RuntimeException("Error getting parcel by ID", ex);
+        }
+    }
+
+
+    @Override
+    public Parcel update(Parcel parcel) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            em.merge(parcel);
+            Parcel updated = em.merge(parcel);
             em.getTransaction().commit();
+            return updated;
         } catch (Exception ex) {
-            throw new RuntimeException("Error updating parcel status ", ex);
+            throw new RuntimeException("Error updating parcel", ex);
         }
     }
 
-     */
-
-    // chats option b for updating a parcel. em.find only works with PK and not tracking num
-    public void updateStatus(String trackingNumber, DeliveryStatus newStatus) {
+    @Override
+    public boolean delete(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-
-            TypedQuery<Parcel> query = em.createQuery(
-                    "SELECT p FROM Parcel p WHERE p.trackingNumber = :trackingNumber",
-                    Parcel.class
-            );
-            query.setParameter("trackingNumber", trackingNumber);
-
-            Parcel parcel = query.getSingleResult();
-            parcel.setDeliveryStatus(newStatus);
-
-            em.merge(parcel);
-            em.getTransaction().commit();
-        } catch (Exception ex) {
-            throw new RuntimeException("Error updating parcel status ", ex);
-        }
-    }
-
-
-
-    // em.find bruger PK i DB som reference. Denne metoder tager tracking num som parameter
-    // og derfor virker denne metode ikke.
-    /*
-    public boolean deleteParcelByTrackingNumber(String trackingNumber) {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            em.remove(trackingNumber);
-            em.getTransaction().commit();
-        } catch (Exception ex) {
-            throw new RuntimeException("Error deleting parcel ", ex);
-        }
-        return false;
-    }
-     */
-
-    // same with em.remove only takes a PK and not tracking num
-    public boolean deleteParcelByTrackingNumber(String trackingNumber) {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-
-            // Query for the parcel by tracking number
-            TypedQuery<Parcel> query = em.createQuery(
-                    "SELECT p FROM Parcel p WHERE p.trackingNumber = :trackingNumber",
-                    Parcel.class
-            );
-            query.setParameter("trackingNumber", trackingNumber);
-            List<Parcel> results = query.getResultList();
-
-            // if statement if results = empty
-            if (results.isEmpty()) {
-                em.getTransaction().commit(); // nothing to delete
-                return false;
+            Parcel parcel = em.find(Parcel.class, id);
+            if (parcel != null) {
+                em.remove(parcel);
+                em.getTransaction().commit();
+                return true;
             }
-
-            // Delete the first (and should be only) matching parcel
-            Parcel parcel = results.get(0);
-            em.remove(parcel);
-            em.getTransaction().commit();
-            return true;
-
+            em.getTransaction().rollback();
+            return false;
         } catch (Exception ex) {
-            throw new RuntimeException("Error deleting parcel ", ex);
+            throw new RuntimeException("Error deleting parcel", ex);
         }
     }
 
-
+    @Override
+    public List<Parcel> getAll() {
+        try (EntityManager em = emf.createEntityManager()) {
+            return em.createQuery("SELECT p FROM Parcel p", Parcel.class).getResultList();
+        } catch (Exception ex) {
+            throw new RuntimeException("Error getting all parcels", ex);
+        }
+    }
 }
+

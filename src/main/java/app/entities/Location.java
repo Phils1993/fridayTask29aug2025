@@ -11,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Builder
 public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +26,4 @@ public class Location {
     @Column(nullable = false)
     private String address;
 
-    public Location(double latitude, double longitude, String address) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.address = address;
-    }
 }

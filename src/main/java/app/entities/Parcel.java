@@ -4,9 +4,7 @@ package app.entities;
 import app.annotation.VeryImportant;
 import app.enums.DeliveryStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,6 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "parcels")
 @NoArgsConstructor
+@Builder
+@ToString
 
 public class Parcel {
     @Id
@@ -40,15 +40,10 @@ public class Parcel {
     private LocalDate updated;
 
     @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
     private List<Shipment> shipments = new ArrayList<>();
 
-    public Parcel(String trackingNumber, String senderName, String receiverName, DeliveryStatus deliveryStatus, LocalDate updated) {
-        this.trackingNumber = trackingNumber;
-        this.senderName = senderName;
-        this.receiverName = receiverName;
-        this.deliveryStatus = deliveryStatus;
-        this.updated = updated;
-    }
 
     @PreUpdate
     public void preUpdate() {
@@ -60,7 +55,7 @@ public class Parcel {
         this.updated = LocalDate.now();
     }
 
-    // Convenience methods for bidirectional mangement
+    // Convenience methods for bidirectional management
     public void addShipment(Shipment shipment) {
         this.shipments.add(shipment);
         if (shipment != null) {
@@ -74,9 +69,6 @@ public class Parcel {
             shipment.setParcel(null);
         }
     }
-
-
-
 
 
 }

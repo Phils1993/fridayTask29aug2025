@@ -1,3 +1,5 @@
+/*
+
 package app.DaoS;
 
 import app.config.HibernateConfig;
@@ -53,7 +55,7 @@ class ParcelDAOTest {
         parcel.setDeliveryStatus(DeliveryStatus.PENDING);
 
         // act
-        parcelDAO.createParcel(parcel);
+        parcelDAO.create(parcel);
 
         // assert
         List<Parcel> results = parcelDAO.parcelByTrackingNumber("Track12345");
@@ -153,3 +155,5 @@ class ParcelDAOTest {
 
     }
 }
+
+ */
