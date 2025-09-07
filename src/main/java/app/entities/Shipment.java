@@ -43,4 +43,5 @@ public class Shipment {
         this.destinationLocation = destinationLocation;
         this.shipmentDateTime = shipmentDateTime;
     }
+
 }

@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 // API to @before all etc.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ParcelDAOTest {
+
     private EntityManagerFactory emf;
     private ParcelDAO parcelDAO;
 

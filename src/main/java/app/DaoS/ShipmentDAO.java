@@ -21,11 +21,11 @@ public class ShipmentDAO implements Idao<Shipment, Integer> {
             if (!em.contains(shipment.getParcel())) {
                 shipment.setParcel(em.merge(shipment.getParcel()));
             }
-            if(!em.contains(shipment.getLocation())) {
-                shipment.setLocation(em.merge(shipment.getLocation()));
+            if(!em.contains(shipment.getSourceLocation())) {
+                shipment.setSourceLocation(em.merge(shipment.getSourceLocation()));
             }
-            if(!em.contains(shipment.getDestination())) {
-                shipment.setDestination(em.merge(shipment.getDestination()));
+            if(!em.contains(shipment.getDestinationLocation())) {
+                shipment.setDestinationLocation(em.merge(shipment.getDestinationLocation()));
             }
             em.persist(shipment);
             return shipment;
