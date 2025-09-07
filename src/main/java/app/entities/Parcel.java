@@ -39,7 +39,7 @@ public class Parcel {
 
     private LocalDate updated;
 
-    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @ToString.Exclude
     @Builder.Default
     private List<Shipment> shipments = new ArrayList<>();

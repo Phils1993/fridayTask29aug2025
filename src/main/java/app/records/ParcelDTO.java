@@ -1,3 +1,4 @@
+/*
 package app.records;
 
 import java.time.LocalDate;
@@ -9,3 +10,5 @@ public record ParcelDTO(
         String deliveryStatus,
         LocalDate updated) {
 }
+
+ */

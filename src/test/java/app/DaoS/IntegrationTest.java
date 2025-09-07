@@ -5,10 +5,6 @@ import app.entities.Location;
 import app.entities.Parcel;
 import app.entities.Shipment;
 import app.enums.DeliveryStatus;
-import app.records.LocationDTO;
-import app.records.ParcelDTO;
-import app.records.ShipmentDTO;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
 
@@ -41,105 +37,107 @@ public class IntegrationTest {
         }
     }
 
+    // LOCATION DAO TESTS
+
     @Test
-    void testCreateAndGetLocationDTO() {
+    void testCreateGetUpdateDeleteLocation() {
         Location location = Location.builder()
-                .latitude(55.6761)
-                .longitude(12.5683)
-                .address("Copenhagen")
+                .latitude(48.8566)
+                .longitude(2.3522)
+                .address("Paris")
                 .build();
 
         Location saved = locationDAO.create(location);
         assertNotNull(saved.getId());
 
-        LocationDTO dto = locationDAO.getDtoById(saved.getId());
-        assertEquals("Copenhagen", dto.address());
-        assertEquals(55.6761, dto.latitude(), 0.0001);
-        assertEquals(12.5683, dto.longitude(), 0.0001);
+        Location fetched = locationDAO.getById(saved.getId());
+        assertEquals("Paris", fetched.getAddress());
+
+        fetched.setAddress("Paris Updated");
+        Location updated = locationDAO.update(fetched);
+        assertEquals("Paris Updated", updated.getAddress());
+
+        boolean deleted = locationDAO.delete(updated.getId());
+        assertTrue(deleted);
     }
 
     @Test
-    void testCreateAndGetParcelDTO() {
+    void testGetAllLocationDTOs() {
+        List<Location> locations = locationDAO.getAll();
+        assertNotNull(locations);
+        assertFalse(locations.isEmpty());
+    }
+
+    // PARCEL DAO TESTS
+
+    @Test
+    void testCreateGetUpdateDeleteParcel() {
         Parcel parcel = Parcel.builder()
-                .trackingNumber("TRACK999")
-                .senderName("Philip")
+                .trackingNumber("TRACKTEST")
+                .senderName("TestSender")
                 .receiverName("TestReceiver")
-                .deliveryStatus(DeliveryStatus.SHIPPED)
+                .deliveryStatus(DeliveryStatus.PENDING)
                 .updated(LocalDate.now())
                 .build();
 
         Parcel saved = parcelDAO.create(parcel);
         assertNotNull(saved.getId());
 
-        ParcelDTO dto = parcelDAO.getDtoById(saved.getId());
-        assertEquals("TRACK999", dto.trackingNumber());
-        assertEquals("Philip", dto.senderName());
-        assertEquals("TestReceiver", dto.reveiverName());
-        assertEquals(DeliveryStatus.SHIPPED.name(), dto.deliveryStatus());
+        Parcel fetched = parcelDAO.getById(saved.getId());
+        assertEquals("TestSender", fetched.getSenderName());
+
+        fetched.setSenderName("UpdatedSender");
+        Parcel updated = parcelDAO.update(fetched);
+        assertEquals("UpdatedSender", updated.getSenderName());
+
+        boolean deleted = parcelDAO.delete(updated.getId());
+        assertTrue(deleted);
     }
 
+
+    // SHIPMENT DAO TESTS
+
     @Test
-    void testCreateAndGetShipmentDTO() {
-        // Create locations
+    void testCreateGetUpdateDeleteShipment() {
         Location source = locationDAO.create(Location.builder()
-                .latitude(59.9139)
-                .longitude(10.7522)
-                .address("Oslo")
+                .latitude(40.7128)
+                .longitude(-74.0060)
+                .address("New York")
                 .build());
 
         Location destination = locationDAO.create(Location.builder()
-                .latitude(52.5200)
-                .longitude(13.4050)
-                .address("Berlin")
+                .latitude(34.0522)
+                .longitude(-118.2437)
+                .address("Los Angeles")
                 .build());
 
-        // Create parcel
-        Parcel parcel = Parcel.builder()
-                .trackingNumber("TRACK888")
-                .senderName("SenderX")
-                .receiverName("ReceiverY")
-                .deliveryStatus(DeliveryStatus.PENDING)
+        Parcel parcel = parcelDAO.create(Parcel.builder()
+                .trackingNumber("TRACKDAO")
+                .senderName("DAO Sender")
+                .receiverName("DAO Receiver")
+                .deliveryStatus(DeliveryStatus.SHIPPED)
                 .updated(LocalDate.now())
-                .build();
+                .build());
 
-        Parcel savedParcel = parcelDAO.create(parcel);
-
-        // Create shipment
         Shipment shipment = Shipment.builder()
-                .parcel(savedParcel)
+                .parcel(parcel)
                 .sourceLocation(source)
                 .destinationLocation(destination)
                 .shipmentDateTime(LocalDateTime.now())
                 .build();
 
-        Shipment savedShipment = shipmentDAO.create(shipment);
-        assertNotNull(savedShipment.getId());
+        Shipment saved = shipmentDAO.create(shipment);
+        assertNotNull(saved.getId());
 
-        ShipmentDTO dto = shipmentDAO.getDtoById(savedShipment.getId());
-        assertEquals("TRACK888", dto.trackingNumber());
-        assertEquals("Oslo", dto.sourceAddress());
-        assertEquals("Berlin", dto.destinationAddress());
-        assertNotNull(dto.shipmentDateTime());
+        Shipment fetched = shipmentDAO.getById(saved.getId());
+        assertEquals("New York", fetched.getSourceLocation().getAddress());
+
+        fetched.setShipmentDateTime(LocalDateTime.now().minusDays(1));
+        Shipment updated = shipmentDAO.update(fetched);
+        assertTrue(updated.getShipmentDateTime().isBefore(LocalDateTime.now()));
+
+        boolean deleted = shipmentDAO.delete(updated.getId());
+        assertTrue(deleted);
     }
 
-    @Test
-    void testGetAllLocationDTOs() {
-        List<LocationDTO> locations = locationDAO.getAllDtos();
-        assertNotNull(locations);
-        assertFalse(locations.isEmpty());
-    }
-
-    @Test
-    void testGetAllParcelDTOs() {
-        List<ParcelDTO> parcels = parcelDAO.getAllDtos();
-        assertNotNull(parcels);
-        assertFalse(parcels.isEmpty());
-    }
-
-    @Test
-    void testGetAllShipmentDTOs() {
-        List<ShipmentDTO> shipments = shipmentDAO.getAllDtos();
-        assertNotNull(shipments);
-        assertFalse(shipments.isEmpty());
-    }
 }

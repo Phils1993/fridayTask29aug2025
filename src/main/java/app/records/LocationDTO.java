@@ -1,3 +1,4 @@
+/*
 package app.records;
 
 public record LocationDTO(
@@ -6,3 +7,4 @@ public record LocationDTO(
         double longitude,
         String address) {
 }
+ */

@@ -2,8 +2,9 @@ import app.DaoS.LocationDAO;
 import app.DaoS.ParcelDAO;
 import app.DaoS.ShipmentDAO;
 import app.config.HibernateConfig;
+import app.entities.Location;
 import app.entities.Parcel;
-import app.records.ParcelDTO;
+import app.entities.Shipment;
 import app.services.Populator;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -20,22 +21,52 @@ public class Main {
         ShipmentDAO shipmentDAO = new ShipmentDAO(emf);
 
 
-        List<ParcelDTO> parcels = Populator.populate(parcelDAO, locationDAO, shipmentDAO);
-        parcels.forEach(System.out::println);
-
-        Parcel parcelToUpdate = parcelDAO.getById(1);
-        parcelToUpdate.setSenderName("Brian");
-        Parcel updatedParcel = parcelDAO.update(parcelToUpdate);
-        System.out.println("Updated parcel: " + updatedParcel.getSenderName());
+        Populator populator = new Populator(locationDAO,parcelDAO,shipmentDAO);
+        populator.populate();
 
 
-        parcelDAO.getDtoById(1);
-        System.out.println("Get parcel details: " + parcelDAO.getDtoById(1));
-
-        // test af metode i main for sjov :-)
-        //dao.createParcel(new Parcel("tracking34567"," Philip", "Møffe", DeliveryStatus.PENDING, LocalDate.now()));
-
+        testInMain();
         emf.close();
 
+    }
+
+
+    public static void testInMain(){
+        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
+        LocationDAO locationDAO = new LocationDAO(emf);
+        ParcelDAO parcelDAO = new ParcelDAO(emf);
+        ShipmentDAO shipmentDAO = new ShipmentDAO(emf);
+
+        //  Get all parcels
+        List<Parcel> parcels = parcelDAO.getAll();
+        System.out.println(" Parcels:");
+        for (Parcel parcel : parcels) {
+            System.out.println(" - ID: " + parcel.getId() + ", Tracking: " + parcel.getTrackingNumber());
+        }
+        //  Get all shipments
+        List<Shipment> shipments = shipmentDAO.getAll();
+        System.out.println("\n Shipments:");
+        for (Shipment shipment : shipments) {
+            System.out.println(" - ID: " + shipment.getId() +
+                    ", Parcel: " + shipment.getParcel().getTrackingNumber() +
+                    ", From: " + shipment.getSourceLocation().getAddress() +
+                    " → To: " + shipment.getDestinationLocation().getAddress());
+        }
+
+        //  Get all locations
+        List<Location> locations = locationDAO.getAll();
+        System.out.println("\n Locations:");
+        for (Location location : locations) {
+            System.out.println(" - ID: " + location.getId() + ", Address: " + location.getAddress());
+        }
+
+        //  Get shipments for a specific parcel
+        Parcel firstParcel = parcels.get(0);
+        System.out.println("\n Shipments for Parcel " + firstParcel.getTrackingNumber() + ":");
+        for (Shipment shipment : firstParcel.getShipments()) {
+            System.out.println(" - Shipment ID: " + shipment.getId() +
+                    ", From: " + shipment.getSourceLocation().getAddress() +
+                    " → To: " + shipment.getDestinationLocation().getAddress());
+        }
     }
 }

@@ -1,3 +1,4 @@
+/*
 package app.records;
 
 import java.time.LocalDateTime;
@@ -9,3 +10,5 @@ public record ShipmentDTO(
         String destinationAddress,
         LocalDateTime shipmentDateTime) {
 }
+
+ */
