@@ -9,6 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 @VeryImportant
 @Entity
 @Data
@@ -36,6 +39,9 @@ public class Parcel {
 
     private LocalDate updated;
 
+    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Shipment> shipments = new ArrayList<>();
+
     public Parcel(String trackingNumber, String senderName, String receiverName, DeliveryStatus deliveryStatus, LocalDate updated) {
         this.trackingNumber = trackingNumber;
         this.senderName = senderName;
@@ -53,6 +59,24 @@ public class Parcel {
     public void prePersist() {
         this.updated = LocalDate.now();
     }
+
+    // Convenience methods for bidirectional mangement
+    public void addShipment(Shipment shipment) {
+        this.shipments.add(shipment);
+        if (shipment != null) {
+            shipment.setParcel(this);
+        }
+    }
+
+    public void removeShipment(Shipment shipment) {
+        this.shipments.remove(shipment);
+        if (shipment != null) {
+            shipment.setParcel(null);
+        }
+    }
+
+
+
 
 
 }
