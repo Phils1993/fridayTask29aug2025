@@ -9,14 +9,27 @@ import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-public class ShipmentDAO implements Idao<Shipment, Integer>, IDTODAO<app.records.ShipmentDTO, Integer> {
+/**
+ * DAO class for managing Shipment entities and their corresponding DTOs.
+ * Provides CRUD operations and DTO projections using JPA.
+ */
+public class ShipmentDAO implements Idao<Shipment, Integer>, IDTODAO<ShipmentDTO, Integer> {
+
+    // Factory for creating EntityManager instances
     private final EntityManagerFactory emf;
 
+    // Constructor initializes the DAO with an EntityManagerFactory
     public ShipmentDAO(EntityManagerFactory emf) {
         this.emf = emf;
     }
 
-
+    /**
+     * Retrieves a ShipmentDTO by its ID using a JPQL constructor expression.
+     * Includes related Parcel and Location data.
+     *
+     * @param id the ID of the shipment
+     * @return a ShipmentDTO containing simplified shipment data
+     */
     @Override
     public ShipmentDTO getDtoById(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
@@ -36,7 +49,12 @@ public class ShipmentDAO implements Idao<Shipment, Integer>, IDTODAO<app.records
         }
     }
 
-
+    /**
+     * Persists a new Shipment entity to the database.
+     *
+     * @param shipment the Shipment entity to create
+     * @return the persisted Shipment entity
+     */
     @Override
     public Shipment create(Shipment shipment) {
         try (EntityManager em = emf.createEntityManager()) {
@@ -45,11 +63,17 @@ public class ShipmentDAO implements Idao<Shipment, Integer>, IDTODAO<app.records
             em.getTransaction().commit();
             return shipment;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            ex.printStackTrace(); // Consider logging instead
         }
         return shipment;
     }
 
+    /**
+     * Retrieves a Shipment entity by its ID.
+     *
+     * @param id the ID of the shipment
+     * @return the Shipment entity, or null if not found
+     */
     @Override
     public Shipment getById(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
@@ -59,6 +83,12 @@ public class ShipmentDAO implements Idao<Shipment, Integer>, IDTODAO<app.records
         }
     }
 
+    /**
+     * Updates an existing Shipment entity in the database.
+     *
+     * @param shipment the Shipment entity with updated data
+     * @return the merged Shipment entity
+     */
     @Override
     public Shipment update(Shipment shipment) {
         try (EntityManager em = emf.createEntityManager()) {
@@ -71,6 +101,12 @@ public class ShipmentDAO implements Idao<Shipment, Integer>, IDTODAO<app.records
         }
     }
 
+    /**
+     * Deletes a Shipment entity by its ID.
+     *
+     * @param id the ID of the shipment to delete
+     * @return true if deletion was successful, false otherwise
+     */
     @Override
     public boolean delete(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
@@ -88,6 +124,11 @@ public class ShipmentDAO implements Idao<Shipment, Integer>, IDTODAO<app.records
         }
     }
 
+    /**
+     * Retrieves all Shipment entities from the database.
+     *
+     * @return a list of all Shipment entities
+     */
     @Override
     public List<Shipment> getAll() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -97,6 +138,11 @@ public class ShipmentDAO implements Idao<Shipment, Integer>, IDTODAO<app.records
         }
     }
 
+    /**
+     * Retrieves all ShipmentDTOs by fetching related Parcel and Location entities.
+     *
+     * @return a list of ShipmentDTOs with simplified shipment data
+     */
     @Override
     public List<ShipmentDTO> getAllDtos() {
         try (EntityManager em = emf.createEntityManager()) {

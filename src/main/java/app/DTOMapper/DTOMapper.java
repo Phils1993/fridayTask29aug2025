@@ -21,7 +21,6 @@ public class DTOMapper {
 
     public static ParcelDTO toParcelDTO(Parcel parcel) {
         return new ParcelDTO(
-                parcel.getId(),
                 parcel.getTrackingNumber(),
                 parcel.getSenderName(),
                 parcel.getReceiverName(),

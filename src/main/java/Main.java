@@ -28,6 +28,10 @@ public class Main {
         Parcel updatedParcel = parcelDAO.update(parcelToUpdate);
         System.out.println("Updated parcel: " + updatedParcel.getSenderName());
 
+
+        parcelDAO.getDtoById(1);
+        System.out.println("Get parcel details: " + parcelDAO.getDtoById(1));
+
         // test af metode i main for sjov :-)
         //dao.createParcel(new Parcel("tracking34567"," Philip", "Møffe", DeliveryStatus.PENDING, LocalDate.now()));
 
